@@ -1,0 +1,25 @@
+# Gradle
+.gradle/
+build/
+
+# VSCode
+.vscode
+
+# Log files
+*.log
+
+# JVM
+*.class
+*.jar
+*.war
+*.ear
+
+# Spring Boot specific
+spring-boot-loader/
+
+# Gradle Wrapper
+gradle/wrapper/gradle-wrapper.jar
+gradle/wrapper/gradle-wrapper.properties
+
+# Spring Boot Configuration Files
+/src/main/resources/application.properties

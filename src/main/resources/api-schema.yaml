@@ -1,0 +1,706 @@
+openapi: 3.0.0
+info:
+  title: Flashcard Management API
+  description: 自分だけの単語帳を管理するためのAPI
+  version: 1.0.0
+tags:
+  - name: Users
+    description: ユーザー関連の操作
+  - name: Groups
+    description: 単語帳グループ関連の操作
+  - name: Notebooks
+    description: 単語帳関連の操作
+  - name: Flashcards
+    description: 単語カード関連の操作
+
+paths:
+  /api/users:
+    post:
+      tags:
+        - Users
+      summary: 新しいユーザーを作成
+      operationId: createUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - sub
+                - created_at
+                - updated_at
+              properties:
+                sub:
+                  type: string
+                  description: ユーザーID（Cognitoのsub)
+                created_at:
+                  type: string
+                  format: date-time
+                  description: ユーザーの作成日時
+                updated_at:
+                  type: string
+                  format: date-time
+                  description: ユーザーの更新日時
+      responses:
+        '201':
+          description: ユーザーが作成されました
+        '400':
+          description: 入力エラー
+
+  /api/groups:
+    post:
+      tags:
+        - Groups
+      summary: 新しい単語帳グループを作成
+      operationId: createGroup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - groupId
+                - sub
+                - groupname
+                - description
+                - created_at
+                - updated_at
+              properties:
+                groupId:
+                  type: string
+                  description: 単語帳グループのID
+                sub:
+                  type: string
+                  description: ユーザーID（Cognitoのsub）
+                groupname:
+                  type: string
+                  description: グループの名前
+                description:
+                  type: string
+                  description: グループの説明
+                created_at:
+                  type: string
+                  format: date-time
+                  description: グループ作成日時
+                updated_at:
+                  type: string
+                  format: date-time
+                  description: グループ更新日時
+      responses:
+        '201':
+          description: 単語帳グループが作成されました
+        '400':
+          description: 単語帳グループ名は1文字以上30文字以下で入力してください
+    get:
+      tags:
+        - Groups
+      summary: 単語帳グループの一覧を取得
+      operationId: showAllGroups
+      responses:
+        '200':
+          description: 全ての単語帳グループを返します
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    groupId:
+                      type: string
+                      description: 単語グループのID
+                    groupname:
+                      type: string
+                      description: 単語帳グループの名前
+                    description:
+                      type: string
+                      description: グループの説明
+                    notebooks:
+                      type: integer
+                      description: 単語帳の数
+                    flashcards:
+                      type: integer
+                      description: 単語カードの数
+        '404':
+          description: 単語帳グループが見つかりません
+
+  /api/groups/{groupId}:
+    get:
+      tags:
+        - Groups
+      summary: 特定の単語帳グループを取得
+      operationId: showGroup
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 単語帳グループのID
+      responses:
+        '200':
+          description: 単語帳グループの詳細を返します
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  groupname:
+                    type: string
+                    description: 単語帳グループの名前
+                  description:
+                    type: string
+                    description: グループの説明
+        '404':
+          description: 単語帳グループが見つかりません
+    put:
+      tags:
+        - Groups
+      summary: 特定の単語帳グループを更新
+      operationId: updateGroup
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 単語帳グループのID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - groupname
+                - description
+              properties:
+                groupname:
+                  type: string
+                  description: 更新する単語帳のグループ名
+                description:
+                  type: string
+                  description: 更新する単語帳の説明
+      responses:
+        '200':
+          description: 単語帳グループが更新されました
+        '400':
+          description: 単語帳グループ名は1文字以上30文字以下で入力してください
+        '404':
+          description: 単語帳グループが見つかりません
+    delete:
+      tags:
+        - Groups
+      summary: 特定の単語帳グループを削除
+      operationId: deleteGroup
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 単語帳グループのID
+      responses:
+        '204':
+          description: 単語帳グループが削除されました
+        '404':
+          description: 単語帳グループが見つかりません
+
+  /api/notebooks:
+    post:
+      tags:
+        - Notebooks
+      summary: 新しい単語帳を作成
+      operationId: createNotebook
+      parameters:
+      - name: groupId
+        in: query
+        required: true
+        schema:
+          type: string
+        description: 単語帳グループのID（クエリパラメータ）
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - notebookId
+                - sub
+                - title
+                - description
+                - created_at
+                - updated_at
+              properties:
+                notebookId:
+                  type: string
+                  description: 単語帳のID
+                sub:
+                  type: string
+                  description: ユーザーID（Cognitoのsub）
+                title:
+                  type: string
+                  description: 単語帳のタイトル
+                description:
+                  type: string
+                  description: 単語帳の説明
+                created_at:
+                  type: string
+                  format: date-time
+                  description: グループ作成日時
+                updated_at:
+                  type: string
+                  format: date-time
+                  description: グループ更新日時
+      responses:
+        '201':
+          description: 単語帳が作成されました
+        '400':
+          description: 単語帳のタイトルは、1文字以上30文字以下で入力してください
+    get:
+      tags:
+        - Notebooks
+      summary: 単語帳の一覧を取得
+      operationId: showAllNotebooks
+      parameters:
+      - name: groupId
+        in: query
+        required: true
+        schema:
+          type: string
+        description: 単語帳グループのID（クエリパラメータ）
+      responses:
+        '200':
+          description: 全ての単語帳を返します
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    notebookId:
+                      type: string
+                      description: 単語帳のID
+                    title:
+                      type: string
+                      description: 単語帳のタイトル
+                    description:
+                      type: string
+                      description: 単語帳の説明
+                    flashcards:
+                      type: integer
+                      description: 単語カードの数
+                    liked:
+                      type: boolean
+                      description: お気に入り設定の状態
+        '404':
+          description: 単語帳が見つかりません
+  
+  /api/notebooks/liked:
+    get:
+      tags:
+        - Notebooks
+      summary: お気に入りの単語帳の一覧を取得
+      operationId: showLikedNotebooks
+      responses:
+        '200':
+          description: 全てのお気に入りの単語帳を返します
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    notebookId:
+                      type: string
+                      description: 単語帳のID
+                    groupId:
+                      type: string
+                      description: 単語帳グループのID
+                    title:
+                      type: string
+                      description: 単語帳のタイトル
+                    description:
+                      type: string
+                      description: 単語帳の説明
+                    flashcards:
+                      type: integer
+                      description: 単語カードの数
+                    liked:
+                      type: boolean
+                      description: お気に入り設定の状態
+        '404':
+          description: 単語帳が見つかりません
+
+  /api/notebooks/{notebookId}:
+    get:
+      tags:
+        - Notebooks
+      summary: 特定の単語帳を取得
+      operationId: showNotebook
+      parameters:
+        - name: notebookId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 単語帳のID(パスパラメータ)
+      responses:
+        '200':
+          description: 単語帳の詳細を返します
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
+                    description: 単語帳のタイトル
+                  description:
+                    type: string
+                    description: 単語帳の説明
+                  flashcards:
+                    type: integer
+                    description: 単語カードの数
+                  liked:
+                    type: boolean
+                    description: お気に入り設定の状態
+        '404':
+          description: 単語帳が見つかりません
+    put:
+      tags:
+        - Notebooks
+      summary: 特定の単語帳の更新
+      operationId: updateNotebook
+      parameters:
+        - name: notebookId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 単語帳のID(パスパラメータ)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - groupId
+                - title
+                - description
+                - liked
+              properties:
+                groupId:
+                  type: string
+                  description: 移動先の英単語帳のグループID
+                title:
+                  type: string
+                  description: 更新する単語帳のタイトル
+                description:
+                  type: string
+                  description: 更新する単語帳の説明
+                liked:
+                  type: boolean
+                  description: 更新するお気に入りマークの状態
+      responses:
+        '200':
+          description: 単語帳が更新されました
+        '400':
+          description: 単語帳のタイトルは1文字以上30文字以下で入力してください
+        '404':
+          description: 単語帳が見つかりません
+    patch:
+      tags:
+        - Notebooks
+      summary: 特定の単語帳の更新
+      operationId: patchNotebook
+      parameters:
+        - name: notebookId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 単語帳のID(パスパラメータ)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - liked
+              properties:
+                groupId:
+                  type: string
+                  description: 移動先の英単語帳のグループID
+                title:
+                  type: string
+                  description: 更新する単語帳のタイトル
+                description:
+                  type: string
+                  description: 更新する単語帳の説明
+                liked:
+                  type: boolean
+                  description: 更新するお気に入りマークの状態
+      responses:
+        '200':
+          description: 単語帳が更新されました
+        '400':
+          description: 単語帳のタイトルは1文字以上30文字以下で入力してください
+        '404':
+          description: 単語帳が見つかりません
+    delete:
+      tags:
+        - Notebooks
+      summary: 特定の単語帳を削除
+      operationId: deleteNotebook
+      parameters:
+        - name: notebookId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 単語帳のID(パスパラメータ)
+      responses:
+        '204':
+          description: 単語帳が削除されました
+        '404':
+          description: 単語帳が見つかりません
+
+  /api/flashcards:
+    post:
+      tags:
+        - Flashcards
+      summary: 新しい単語カードを作成
+      operationId: createFlashcard
+      parameters:
+      - name: notebookId
+        in: query
+        required: true
+        schema:
+          type: string
+        description: 単語帳のID（クエリパラメータ）
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - flashcardId
+                - front_text
+                - back_text
+                - detail
+                - bookmarked
+                - created_at
+                - updated_at
+              properties:
+                flashcardId:
+                  type: string
+                  description: 単語カードのID
+                front_text:
+                  type: string
+                  description: 単語カードの表のテキスト
+                back_text:
+                  type: string
+                  description: 単語カードの裏のテキスト
+                detail:
+                  type: string
+                  description: 単語カードの詳細内容です
+                bookmarked:
+                  type: boolean
+                  description: ブックマークの状態です
+                created_at:
+                  type: string
+                  format: date-time
+                  description: グループ作成日時
+                updated_at:
+                  type: string
+                  format: date-time
+                  description: グループ更新日時
+      responses:
+        '201':
+          description: 単語カードが作成されました
+        '400':
+          description: 入力エラー
+    get:
+        tags:
+          - Flashcards
+        summary: 単語カードの一覧取得
+        operationId: showAllFlashcards
+        parameters:
+        - name: notebookId
+          in: query
+          required: true
+          schema:
+            type: string
+          description: 単語帳のID（クエリパラメータ）
+        responses:
+          '200':
+            description: 全ての単語カードを返します
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      flashcardId:
+                          type: string
+                          description: 単語カードのID
+                      front_text:
+                          type: string
+                          description: 単語カードの表のテキスト
+                      back_text:
+                        type: string
+                        description: 単語カードの裏のテキスト
+                      detail:
+                        type: string
+                        description: 単語カードの詳細内容
+                      bookmarked:
+                        type: boolean
+                        description: ブックマーク設定の状態    
+          '404':
+            description: 単語カードが見つかりません
+
+  /api/flashcards/{flashcardId}:
+    get:
+      tags:
+        - Flashcards
+      summary: 特定の単語カードを取得
+      operationId: showFlashcard
+      parameters:
+        - name: flashcardId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 単語カードのID(パスパラメータ)
+      responses:
+        '200':
+          description: 単語カードの詳細を返します
+          content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    front_text:
+                        type: string
+                        description: 単語カードの表のテキスト
+                    back_text:
+                      type: string
+                      description: 単語カードの裏のテキスト
+                    detail:
+                      type: string
+                      description: 単語カードの詳細内容
+                    bookmarked:
+                      type: boolean
+                      description: ブックマーク設定の状態      
+        '404':
+          description: 単語カードが見つかりません
+    put:
+      tags:
+        - Flashcards
+      summary: 特定の単語カードを更新
+      operationId: updateFlashcard
+      parameters:
+        - name: flashcardId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 単語カードのID(パスパラメータ)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - front_text
+                - back_text
+                - detail
+                - bookmarked
+              properties:
+                front_text:
+                  type: string
+                  description: 単語カードの更新する表のテキスト
+                back_text:
+                  type: string
+                  description: 単語カードの更新する裏のテキスト
+                detail:
+                  type: string
+                  description: 単語カードの更新する詳細内容
+                bookmarked:
+                  type: boolean
+                  description: 更新するブックマークの状態
+      responses:
+        '200':
+          description: 単語カードが更新されました
+        '400':
+          description: 不正なリクエストです
+        '404':
+          description: 単語カードが見つかりません
+    patch:
+      tags:
+        - Flashcards
+      summary: 特定の単語カードを更新
+      operationId: patchFlashcard
+      parameters:
+        - name: flashcardId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 単語カードのID(パスパラメータ)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - bookmarked
+              properties:
+                front_text:
+                  type: string
+                  description: 単語カードの更新する表のテキスト
+                back_text:
+                  type: string
+                  description: 単語カードの更新する裏のテキスト
+                detail:
+                  type: string
+                  description: 単語カードの更新する詳細内容
+                bookmarked:
+                  type: boolean
+                  description: 更新するブックマークの状態
+      responses:
+        '200':
+          description: 単語カードが更新されました
+        '400':
+          description: 不正なリクエストです
+        '404':
+          description: 単語カードが見つかりません
+    delete:
+      tags:
+        - Flashcards
+      summary: 特定の単語カードを削除
+      operationId: deleteFlashcard
+      parameters:
+        - name: flashcardId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 単語カードのID(パスパラメータ)
+      responses:
+        '204':
+          description: 単語カードが削除されました
+        '404':
+          description: 単語カードが見つかりません
