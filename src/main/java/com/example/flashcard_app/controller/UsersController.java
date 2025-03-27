@@ -8,15 +8,26 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.amazonaws.services.lambda.runtime.Context;
 import com.example.flashcard_app.model.Users;
 import com.example.flashcard_app.service.UsersService;
 
+import lombok.Data;
+
 @RestController
+@Data
 @RequestMapping("/api/users")
 public class UsersController {
-    
+
+    private UsersService usersService;
+
+    private Object input;
+    private Context context;
+
     @Autowired
-    UsersService usersService;
+    public UsersController(UsersService usersService){
+		this.usersService = usersService;
+	}
 
     @PostMapping
     public ResponseEntity<String> saveUser(@RequestBody Users users) {
@@ -24,4 +35,3 @@ public class UsersController {
         return ResponseEntity.status(HttpStatus.CREATED).body("User saved successfully!");
     }
 }
-

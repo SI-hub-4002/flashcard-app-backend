@@ -12,11 +12,18 @@ import com.example.flashcard_app.model.Flashcards;
 import com.example.flashcard_app.repository.FlashcardsRepository;
 
 import jakarta.persistence.EntityNotFoundException;
+import lombok.Data;
 
 @Service
+@Data
 public class FlashcardsService {
+
+    private FlashcardsRepository flashcardRepository;
+
     @Autowired
-    FlashcardsRepository flashcardRepository;
+    public FlashcardsService(FlashcardsRepository flashcardRepository){
+		this.flashcardRepository = flashcardRepository;
+	}
 
     public void insert(Flashcards flashcards) {
         if (flashcards.getCreated_at() == null) {

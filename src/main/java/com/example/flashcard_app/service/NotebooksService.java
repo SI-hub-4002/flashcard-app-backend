@@ -16,8 +16,12 @@ import jakarta.persistence.EntityNotFoundException;
 @Service
 public class NotebooksService {
 
+    private NotebooksRepository notebooksRepository;
+
     @Autowired
-    NotebooksRepository notebooksRepository;
+    public NotebooksService(NotebooksRepository notebooksRepository){
+		this.notebooksRepository = notebooksRepository;
+	}
 
     public void insert(Notebooks notebooks) {
 

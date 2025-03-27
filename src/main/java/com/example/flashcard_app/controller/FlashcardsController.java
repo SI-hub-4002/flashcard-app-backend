@@ -18,16 +18,27 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.amazonaws.services.lambda.runtime.Context;
 import com.example.flashcard_app.model.Flashcards;
 import com.example.flashcard_app.service.FlashcardsService;
 
+import lombok.Data;
+
 @RestController
+@Data
 @RequestMapping("/api/flashcards")
 public class FlashcardsController {
-    
-    @Autowired
-    FlashcardsService flashcardsService;
 
+    private FlashcardsService flashcardsService;
+
+    private Object input;
+    private Context context;
+
+    @Autowired
+	public FlashcardsController(FlashcardsService flashcardsService){
+		this.flashcardsService = flashcardsService;
+	}
+    
     @PostMapping
     public ResponseEntity<String> saveFlashcard(@RequestBody Flashcards flashcards, @RequestParam("notebookId") UUID notebookId) {
         flashcards.setNotebookId(notebookId);

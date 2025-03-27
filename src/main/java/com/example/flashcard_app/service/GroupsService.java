@@ -16,8 +16,12 @@ import jakarta.persistence.EntityNotFoundException;
 @Service
 public class GroupsService {
 
+    private GroupsRepository groupsRepository;
+
     @Autowired
-    GroupsRepository groupsRepository;
+    public GroupsService(GroupsRepository groupsRepository){
+		this.groupsRepository = groupsRepository;
+	}
 
     public void insert(Groups groups) {
         if (groups.getCreated_at() == null) {

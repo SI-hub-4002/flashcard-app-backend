@@ -16,15 +16,26 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.amazonaws.services.lambda.runtime.Context;
 import com.example.flashcard_app.model.Groups;
 import com.example.flashcard_app.service.GroupsService;
 
+import lombok.Data;
+
 @RestController
+@Data
 @RequestMapping("/api/groups")
 public class GroupController {
-    
+
+    private GroupsService groupsService;
+
+    private Object input;
+    private Context context;
+
     @Autowired
-    GroupsService groupsService;
+    public GroupController(GroupsService groupsService){
+		this.groupsService = groupsService;
+	}
 
     @PostMapping
     public ResponseEntity<String> saveGroup(@RequestBody Groups groups) {

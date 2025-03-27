@@ -18,16 +18,27 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.amazonaws.services.lambda.runtime.Context;
 import com.example.flashcard_app.model.Notebooks;
 import com.example.flashcard_app.service.NotebooksService;
 
+import lombok.Data;
+
 @RestController
+@Data
 @RequestMapping("/api/notebooks")
 public class NotebooksController {
-    
-    @Autowired
-    NotebooksService notebooksService;
 
+    private NotebooksService notebooksService;
+
+    private Object input;
+    private Context context;
+
+    @Autowired
+	public NotebooksController(NotebooksService notebooksService){
+		this.notebooksService = notebooksService;
+	}
+    
     @PostMapping
     public ResponseEntity<String> saveNotebook(@RequestBody Notebooks notebooks, @RequestParam("groupId") UUID groupId) {
         notebooks.setGroupId(groupId);
